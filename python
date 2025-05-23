@@ -6,7 +6,7 @@ from ap scheduler. schedulers. async io import Async IO Scheduler
 from datetime import datetime, time
 
 # Configuration
-BOT_TOKEN = "7712094263:AAGNlHyieeNs4ywICheoqhTO4mJMJFw9-fQ"
+BOT_TOKEN = "******"
 
 async def send_ content(bot, chat_ id, message=None, photo_ path=None):
     """Send message/photo with comprehensive error handling"""
