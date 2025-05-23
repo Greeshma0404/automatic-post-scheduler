@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+
+import async io
+from telegram import Bot, error
+from ap scheduler. schedulers. async io import Async IO Scheduler
+from datetime import datetime, time
+
+# Configuration
+BOT_TOKEN = "7712094263:AAGNlHyieeNs4ywICheoqhTO4mJMJFw9-fQ"
+
+async def send_ content(bot, chat_ id, message=None, photo_ path=None):
+    """Send message/photo with comprehensive error handling"""
+    try:
+        if photo_ path:
+            with open(photo_ path, 'rb') as photo_ file:
+                if message:
+                    await bot. send_ photo(
+                        chat_ id=chat_ id,
+                        photo=photo_ file,
+                        caption=message
+                    )
+                else:
+                    await bot. send_ photo(
+                        chat_ id=chat_ id,
+                        photo=photo_ file
+                    )
+        elif  message:
+            await bot. send_ message(
+                chat_ id=chat_ id,
+                text=message
+            )
+        
+        timestamp = datetime. now(). Str f time('%Y-%m-%d %H:%M:%S')
+        print(f"\n Successfully sent to {chat_ id} at {timestamp}")
+        return True
+        
+    except error. Unauthorized:
+        print("\n Error: Bot was blocked or chat doesn't exist")
+    except error. Bad Request as e:
+        print(f"\n Telegram error: {e. message}")
+    except File Not Found Error:
+        print(f"\n Error: Photo file not found at '{photo_path}'")
+    except Exception as e:
+        print(f"\n Unexpected error: {str(e)}")
+    return False
+
+def get_ valid_ input(prompt, input_ type=str, optional=False):
+    """Advanced input validation"""
+    while True:
+        try:
+            user_ input = input(prompt).strip()
+            if not user_ input and not optional:
+                raise Value Error("This field cannot be empty")
+            
+            if input_ type == bool:
+                return user_ input. lower() in ('y', 'yes')
+            elif input_ type == time:
+                hour, minute = map(int, user_ input. split(':'))
+                if not (0 <= hour <= 23 and 0 <= minute <= 59):
+                    raise Value Error
+                return time(hour, minute)
+            return input_ type(user_ input) if user_ input else None
+            
+        except Value Error:
+            print(f" Invalid input. Please try again.")
+
+async def main():
+    """Main execution flow"""
+    print("\n" + "="*50)
+    print(" TELEGRAM CONTENT SCHEDULER ".center(50, "☆"))
+    print("="*50)
+    
+    # Initialize components
+    bot = Bot(token=BOT_TOKEN)
+    scheduler = Async IO Scheduler()
+    
+    # Get user inputs
+    print("\n" + "-"*50)
+    chat_ id = get_ valid_ input("Recipient's Chat ID: ")
+    message = get_ valid_ input("Message (optional, press Enter to skip): ", str, optional=True)
+    
+    send_ photo = get_ valid_ input("Include photo? (y/n): ", bool)
+    photo_ path = None
+    if send_ photo:
+        photo_ path = get_ valid_ input("Full photo path (e.g., C:\\pics\\image.jpg): ")
+    
+    scheduled_ time = get_ valid_ input("Send time (HH:MM 24h format or 'now'): ", time)
+    
+    # Schedule the content
+    if scheduled_ time == "now":
+        print("\n Attempting to send now...")
+        await send_ content(bot, chat_ id, message, photo_ path)
+    else:
+        scheduler .add_ job(
+            send_ content,
+            'c r on',
+            args =[bot, chat_ id],
+            Kw args={'message': message, 'photo_ path': photo_ path},
+            hour=scheduled_ time. hour,
+            minute=scheduled_ time. minute
+        )
+        scheduler. start()
+        
+        print("\n" + "-"*50)
+        print(f" Content scheduled for {scheduled_ time. str f time('%I:%M %p')}")
+        if photo_ path:
+            print(f" Attached photo: {photo_ path}")
+        print("-"*50 + "\n")
+        
+        print("Note: Keep this window running for scheduled messages")
+        print("Press Ctrl +C to exit\n")
+        
+        try:
+            while True:
+                await async io. sleep(1)
+        except Keyboard Interrupt:
+            scheduler. shutdown()
+            print("\n Scheduler stopped gracefully")
+
+if _name_ == "_main_":
+    try:
+        async io. run(main())
+    except Exception as e:
+        print(f"\n Critical error: {str(e)}")
+        print("Please check your configuration and try again.")
